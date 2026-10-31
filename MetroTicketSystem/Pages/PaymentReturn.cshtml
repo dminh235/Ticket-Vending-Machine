@@ -1,0 +1,72 @@
+﻿@page
+@model MetroTicketSystem.Pages.PaymentReturnModel
+
+@{
+    var vi = ViewContext.HttpContext.Request.Cookies["lang"] != "en";
+    ViewData["Title"] = vi ? "Kết quả thanh toán" : "Payment result";
+}
+
+<div class="container mt-5">
+    <div class="card mx-auto shadow" style="max-width: 800px;">
+        <div class="card-body text-center p-4">
+
+            @if (!Model.IsValidSignature)
+            {
+                <h2 class="text-danger mb-3">@(vi ? "Không xác minh được giao dịch" : "Transaction could not be verified")</h2>
+                <p>@Model.Message</p>
+            }
+            else if (Model.IsSuccess)
+            {
+                <h2 class="text-success mb-3">@(vi ? "Thanh toán thành công!" : "Payment successful!")</h2>
+                <p>@Model.Message</p>
+            }
+            else
+            {
+                <h2 class="text-danger mb-3">@(vi ? "Thanh toán thất bại" : "Payment failed")</h2>
+                <p>@Model.Message</p>
+            }
+
+            @if (Model.IsValidSignature)
+            {
+                <hr />
+
+                <div class="text-start">
+                    <p><strong>@(vi ? "Mã đơn hàng:" : "Order ID:")</strong> @Model.OrderId</p>
+                    <p><strong>@(vi ? "Mã giao dịch VNPAY:" : "VNPAY transaction ID:")</strong> @Model.TransactionNo</p>
+                    <p><strong>@(vi ? "Số tiền:" : "Amount:")</strong> @Model.Amount.ToString("N0") VNĐ</p>
+                    <p><strong>@(vi ? "Ngân hàng:" : "Bank:")</strong> @Model.BankCode</p>
+                    <p><strong>@(vi ? "Nội dung:" : "Description:")</strong> @Model.OrderInfo</p>
+                    <p><strong>@(vi ? "Thời gian thanh toán:" : "Payment time:")</strong> @Model.PayDate</p>
+                </div>
+
+                @if (Model.IsSuccess)
+                {
+                    <hr />
+                    @await Html.PartialAsync("_Tickets", Model.Tickets)
+
+                    <p class="text-muted small mt-3">
+                        @(vi ? "Tự động về trang chủ sau" : "Returning to the home page in")
+                        <span id="autoBack">60</span>
+                        @(vi ? "giây." : "seconds.")
+                    </p>
+
+                    <script>
+                        let secondsLeft = 60;
+                        const autoBackTimer = setInterval(function () {
+                            secondsLeft--;
+                            document.getElementById("autoBack").textContent = secondsLeft;
+                            if (secondsLeft <= 0) {
+                                clearInterval(autoBackTimer);
+                                window.location.href = "/";
+                            }
+                        }, 1000);
+                    </script>
+                }
+            }
+
+            <a asp-page="/Index" class="btn btn-primary mt-3">
+                @(vi ? "Về trang chủ" : "Back to home")
+            </a>
+        </div>
+    </div>
+</div>

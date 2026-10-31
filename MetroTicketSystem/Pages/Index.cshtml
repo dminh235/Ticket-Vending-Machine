@@ -1,0 +1,641 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Mua vé";
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        header:not(.ticket-header), footer, .border-top.footer {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f6f8;
+            font-family: Arial, sans-serif;
+        }
+
+        .ticket-page {
+            min-height: 100vh;
+            background: #f5f6f8;
+            color: #222;
+        }
+
+        .ticket-header {
+            height: 95px;
+            background: #3987ed;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 2px 5px #bbb;
+        }
+
+        .ticket-header h1 {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .language-area {
+            position: absolute;
+            right: 35px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .language-globe {
+            font-size: 32px;
+        }
+
+        .language-button {
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .language-menu {
+            display: none;
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 180px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px #999;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .language-menu button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: white;
+            text-align: left;
+            font-size: 18px;
+            cursor: pointer;
+            color: #222;
+        }
+
+        .language-menu button:hover {
+            background: #e8f1ff;
+        }
+
+        .ticket-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 35px 35px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .departure-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .departure-section .section-title {
+            margin-bottom: 0;
+        }
+
+        .departure-station {
+            display: inline-block;
+            background: #e4edfa;
+            border: 2px solid #3987ed;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .route-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .route-row {
+            display: grid;
+            grid-template-columns: 130px 1fr 1fr;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .route-name {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .station-button {
+            min-height: 70px;
+            padding: 12px;
+            border: 2px solid #b8c4d4;
+            border-radius: 12px;
+            background: white;
+            font-size: 22px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .station-button:hover {
+            border-color: #3987ed;
+            background: #edf5ff;
+        }
+
+        .station-button.selected {
+            border: 3px solid #3987ed;
+            background: #dceaff;
+            color: #1458a8;
+            font-weight: bold;
+        }
+
+        .ticket-type-section {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .ticket-type-section .section-title {
+            margin-bottom: 0;
+        }
+
+        .ticket-type {
+            font-size: 26px;
+            font-weight: bold;
+            color: #1458a8;
+            line-height: 1.2;
+        }
+
+        .ticket-options {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .ticket-option {
+            min-width: 160px;
+            padding: 14px 26px;
+            border: 2px solid #b8c4d4;
+            background: white;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .ticket-option.selected {
+            background: #3987ed;
+            color: white;
+            border-color: #3987ed;
+            font-weight: bold;
+        }
+
+        .continue-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 35px;
+        }
+
+        .continue-button {
+            background: #3987ed;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 16px 45px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .continue-button:hover {
+            background: #2469c4;
+        }
+
+        .continue-button:disabled {
+            background: #aab5c4;
+            cursor: not-allowed;
+        }
+
+        .validation-message {
+            color: #d32f2f;
+            margin-top: 12px;
+            font-size: 18px;
+        }
+
+        @@media (max-width: 650px) {
+            .route-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .route-name {
+                grid-column: 1 / -1;
+            }
+
+            .ticket-header {
+                height: 80px;
+            }
+
+            .ticket-header h1 {
+                font-size: 26px;
+            }
+
+            .language-area {
+                right: 12px;
+                gap: 8px;
+            }
+
+            .language-globe {
+                font-size: 24px;
+            }
+
+            .language-button {
+                font-size: 18px;
+                padding: 4px 10px;
+            }
+
+            .ticket-content {
+                padding: 22px 15px;
+            }
+
+            .section-title {
+                font-size: 22px;
+            }
+
+            .departure-station, .ticket-type {
+                font-size: 20px;
+            }
+
+            .station-button, .ticket-option {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="startScreen"
+     style="position:fixed; inset:0; z-index:2000; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; text-align:center; color:#fff;
+            background:linear-gradient(160deg, #1f5fbf 0%, #3987ed 100%);">
+    <div style="font-size:1.1rem; letter-spacing:4px; opacity:.85;">SMART TICKETING SYSTEM</div>
+    <h1 style="font-size:4rem; font-weight:800; margin:12px 0;">METRO TICKET</h1>
+    <p style="font-size:1.4rem; margin-bottom:6px;">Ga Bến Thành / Ben Thanh Station</p>
+    <p style="font-size:1.1rem; opacity:.9; margin-bottom:36px;">
+        Chạm để mua vé / Touch to buy a ticket
+    </p>
+    <button id="startButton" type="button"
+            style="font-size:2rem; font-weight:700; padding:18px 70px; border:none;
+                   border-radius:60px; background:#fff; color:#1f5fbf; cursor:pointer;
+                   box-shadow:0 6px 18px rgba(0,0,0,.25);">
+        BẮT ĐẦU / START
+    </button>
+</div>
+
+<script>
+    (function () {
+        const startScreen = document.getElementById("startScreen");
+
+        if (window.location.search) {
+            startScreen.style.display = "none";
+            return;
+        }
+
+        document.getElementById("startButton").addEventListener("click", function () {
+            startScreen.style.display = "none";
+        });
+    })();
+</script>
+
+<div class="ticket-page">
+
+    <header class="ticket-header">
+        <h1 id="pageTitle">Mua vé</h1>
+
+        <div class="language-area">
+            <span class="language-globe">🌐</span>
+
+            <button type="button"
+                    class="language-button"
+                    id="languageButton"
+                    aria-label="Chọn ngôn ngữ"
+                    aria-expanded="false">
+                VN
+            </button>
+
+            <div class="language-menu" id="languageMenu">
+                <button type="button" data-language="vi">
+                    VN Tiếng Việt
+                </button>
+
+                <button type="button" data-language="en">
+                    EN English
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="ticket-content">
+
+        <!-- Ga đi trên cùng 1 hàng -->
+        <section class="section departure-section">
+            <div class="section-title" id="departureLabel">
+                Ga đi
+            </div>
+
+            <div class="departure-station" id="departureStation">
+                Bến Thành
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-title" id="destinationLabel">
+                Ga đến
+            </div>
+
+            <div class="route-list">
+
+                <div class="route-row">
+                    <div class="route-name" data-vi="Tuyến 1" data-en="Route 1">
+                        Tuyến 1
+                    </div>
+
+                    <button type="button" class="station-button"
+                            data-station="Tan My" data-vi="Tân Mỹ">
+                        Tân Mỹ
+                    </button>
+
+                    <button type="button" class="station-button"
+                            data-station="Can Gio" data-vi="Cần Giờ">
+                        Cần Giờ
+                    </button>
+                </div>
+
+                <div class="route-row">
+                    <div class="route-name" data-vi="Tuyến 2" data-en="Route 2">
+                        Tuyến 2
+                    </div>
+
+                    <button type="button" class="station-button"
+                            data-station="Le Thi Rieng" data-vi="Lê Thị Riêng">
+                        Lê Thị Riêng
+                    </button>
+
+                    <button type="button" class="station-button"
+                            data-station="Tan Son Nhat" data-vi="Tân Sơn Nhất">
+                        Tân Sơn Nhất
+                    </button>
+                </div>
+
+                <div class="route-row">
+                    <div class="route-name" data-vi="Tuyến 3" data-en="Route 3">
+                        Tuyến 3
+                    </div>
+
+                    <button type="button" class="station-button"
+                            data-station="Suoi Tien" data-vi="Suối Tiên">
+                        Suối Tiên
+                    </button>
+
+                    <button type="button" class="station-button"
+                            data-station="Long Thanh Airport" data-vi="Sân bay Long Thành">
+                        Sân bay Long Thành
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="validation-message" id="destinationError" style="display:none">
+                Vui lòng chọn ga đến.
+            </div>
+        </section>
+
+        <!-- Loại vé: Thêm dấu hai chấm và căn dóng baseline chuẩn hàng -->
+        <section class="section ticket-type-section">
+            <div class="section-title" id="ticketTypeLabel">
+                Loại vé:
+            </div>
+
+            <div class="ticket-type">
+                <span id="ticketTypeValue">Vé lượt</span>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-title" id="tripTypeLabel">
+                Hình thức vé
+            </div>
+
+            <div class="ticket-options">
+
+                <button type="button"
+                        class="ticket-option selected"
+                        data-trip="oneway"
+                        id="oneWayButton">
+                    Một chiều
+                </button>
+
+                <button type="button"
+                        class="ticket-option"
+                        data-trip="roundtrip"
+                        id="roundTripButton">
+                    Khứ hồi
+                </button>
+
+            </div>
+        </section>
+
+        <div class="continue-area">
+            <button type="button"
+                    class="continue-button"
+                    id="continueButton"
+                    disabled>
+                Tiếp tục →
+            </button>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    let selectedStation = "";
+    let selectedTrip = "oneway";
+    let currentLanguage = "vi";
+
+    const languageButton = document.getElementById("languageButton");
+    const languageMenu = document.getElementById("languageMenu");
+
+    languageButton.addEventListener("click", function () {
+        const isOpen = languageMenu.style.display === "block";
+        languageMenu.style.display = isOpen ? "none" : "block";
+        languageButton.setAttribute("aria-expanded", String(!isOpen));
+    });
+
+    document.querySelectorAll("[data-language]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            currentLanguage = this.dataset.language;
+
+            languageButton.textContent =
+                currentLanguage === "vi" ? "VN" : "EN";
+
+            languageMenu.style.display = "none";
+            languageButton.setAttribute("aria-expanded", "false");
+
+            updateLanguage();
+        });
+    });
+
+    function updateLanguage() {
+        const isVietnamese = currentLanguage === "vi";
+
+        document.getElementById("pageTitle").textContent =
+            isVietnamese ? "Mua vé" : "Buy Ticket";
+
+        document.getElementById("departureLabel").textContent =
+            isVietnamese ? "Ga đi" : "Departure Station";
+
+        document.getElementById("departureStation").textContent =
+            isVietnamese ? "Bến Thành" : "Ben Thanh";
+
+        document.getElementById("destinationLabel").textContent =
+            isVietnamese ? "Ga đến" : "Destination Station";
+
+        document.getElementById("ticketTypeLabel").textContent =
+            isVietnamese ? "Loại vé:" : "Ticket Type:";
+
+        document.getElementById("ticketTypeValue").textContent =
+            isVietnamese ? "Vé lượt" : "Single-use ticket";
+
+        document.getElementById("tripTypeLabel").textContent =
+            isVietnamese ? "Hình thức vé" : "Trip Type";
+
+        document.getElementById("oneWayButton").textContent =
+            isVietnamese ? "Một chiều" : "One-way";
+
+        document.getElementById("roundTripButton").textContent =
+            isVietnamese ? "Khứ hồi" : "Round trip";
+
+        document.getElementById("continueButton").textContent =
+            isVietnamese ? "Tiếp tục →" : "Continue →";
+
+        document.getElementById("destinationError").textContent =
+            isVietnamese
+                ? "Vui lòng chọn ga đến."
+                : "Please select a destination.";
+
+        document.querySelectorAll(".station-button").forEach(function (button) {
+            button.textContent = isVietnamese
+                ? button.dataset.vi
+                : button.dataset.station;
+        });
+
+        document.querySelectorAll(".route-name").forEach(function (item) {
+            item.textContent = isVietnamese
+                ? item.dataset.vi
+                : item.dataset.en;
+        });
+    }
+
+    document.querySelectorAll(".station-button").forEach(function (button) {
+        button.addEventListener("click", function () {
+            document.querySelectorAll(".station-button").forEach(function (item) {
+                item.classList.remove("selected");
+            });
+
+            this.classList.add("selected");
+            selectedStation = this.dataset.station;
+
+            document.getElementById("destinationError").style.display = "none";
+            document.getElementById("continueButton").disabled = false;
+        });
+    });
+
+    document.querySelectorAll(".ticket-option").forEach(function (button) {
+        button.addEventListener("click", function () {
+            document.querySelectorAll(".ticket-option").forEach(function (item) {
+                item.classList.remove("selected");
+            });
+
+            this.classList.add("selected");
+            selectedTrip = this.dataset.trip;
+        });
+    });
+
+    document.getElementById("continueButton").addEventListener("click", function () {
+        if (selectedStation === "") {
+            document.getElementById("destinationError").style.display = "block";
+            return;
+        }
+
+        const params = new URLSearchParams({
+            destination: selectedStation,
+            tripType: selectedTrip,
+            language: currentLanguage
+        });
+
+        window.location.href = "/Page2?" + params.toString();
+    });
+
+    (function restoreSelections() {
+        const params = new URLSearchParams(window.location.search);
+
+        const lang = params.get("language");
+        if (lang === "vi" || lang === "en") {
+            currentLanguage = lang;
+            languageButton.textContent = lang === "vi" ? "VN" : "EN";
+            updateLanguage();
+        }
+
+        const trip = params.get("tripType");
+        if (trip === "oneway" || trip === "roundtrip") {
+            const tripButton = document.querySelector('.ticket-option[data-trip="' + trip + '"]');
+            if (tripButton) tripButton.click();
+        }
+
+        const station = params.get("destination");
+        if (station) {
+            const stationButton = Array.from(document.querySelectorAll(".station-button"))
+                .find(b => b.dataset.station === station);
+            if (stationButton) stationButton.click();
+        }
+    })();
+
+    let idleTimer;
+    function resetIdle() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(function () { window.location.href = "/"; }, 5 * 60 * 1000);
+    }
+    ["click", "touchstart", "keydown", "mousemove"].forEach(function (e) {
+        document.addEventListener(e, resetIdle);
+    });
+    resetIdle();
+</script>
+</body>
+</html>

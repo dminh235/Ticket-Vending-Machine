@@ -1,0 +1,159 @@
+﻿@using MetroTicketSystem.Models
+@model List<Ticket>
+@{
+    var vi = ViewContext.HttpContext.Request.Cookies["lang"] != "en";
+}
+
+<style>
+    .ticket-section-title {
+        font-size: 30px;
+        font-weight: bold;
+        margin-top: 25px;
+        margin-bottom: 20px;
+    }
+
+    .ticket-card {
+        background: #ffffff;
+        border: 2px dashed #3987ed;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .ticket-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .ticket-brand {
+        font-size: 24px;
+        font-weight: bold;
+        color: #222;
+    }
+
+    .ticket-badge {
+        font-size: 18px;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .ticket-badge-outbound {
+        background-color: #3987ed;
+        color: #ffffff;
+    }
+
+    .ticket-badge-return {
+        background-color: #ffc107;
+        color: #222222;
+    }
+
+    .ticket-route {
+        font-size: 24px;
+        font-weight: bold;
+        color: #1458a8;
+        margin: 14px 0;
+    }
+
+    .ticket-detail {
+        font-size: 20px;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .ticket-detail-muted {
+        color: #666;
+    }
+
+    .ticket-barcode-container {
+        text-align: center;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    @@media (max-width: 650px) {
+        .ticket-section-title {
+            font-size: 24px;
+        }
+
+        .ticket-brand {
+            font-size: 20px;
+        }
+
+        .ticket-badge {
+            font-size: 16px;
+            padding: 4px 10px;
+        }
+
+        .ticket-route {
+            font-size: 20px;
+        }
+
+        .ticket-detail {
+            font-size: 18px;
+        }
+    }
+</style>
+
+@if (Model.Count > 0)
+{
+    <div class="ticket-section-title">
+        @(vi ? "Vé của bạn" : "Your tickets") (@Model.Count)
+    </div>
+
+    <div class="row g-3">
+        @foreach (var t in Model)
+        {
+            <div class="col-12 col-md-6">
+                <div class="ticket-card text-start">
+                    <div class="ticket-header-row">
+                        <span class="ticket-brand">METRO TICKET</span>
+                        <span class="ticket-badge @(t.Direction == "outbound" ? "ticket-badge-outbound" : "ticket-badge-return")">
+                            @(t.Direction == "outbound"
+                                ? (vi ? "Lượt đi" : "Outbound")
+                                : (vi ? "Lượt về" : "Return"))
+                        </span>
+                    </div>
+
+                    <div class="ticket-route">
+                        @StationNames.Localize(t.FromStation, vi) → @StationNames.Localize(t.ToStation, vi)
+                    </div>
+
+                    <div class="ticket-detail ticket-detail-muted">
+                        @(vi ? "Mã vé" : "Ticket ID"): <strong>@t.TicketId</strong>
+                    </div>
+                    <div class="ticket-detail">
+                        @(vi ? "Giá" : "Fare"): <strong>@t.Fare.ToString("N0") đ</strong>
+                    </div>
+                    <div class="ticket-detail">
+                        @(vi ? "Phát hành" : "Issued"): @t.IssuedAt.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                    <div class="ticket-detail">
+                        @(vi ? "Có hiệu lực ngày" : "Valid on"): @t.ValidDate.ToString("dd/MM/yyyy")
+                    </div>
+                    <div class="ticket-detail" style="color: #2469c4; font-weight: bold;">
+                        @(vi ? "Vé dùng 1 lần" : "Single-use ticket")
+                    </div>
+
+                    <div class="ticket-barcode-container">
+                        <svg class="ticket-barcode"
+                             style="width:90%; max-width:100%; height:auto;"
+                             jsbarcode-value="@t.TicketId"
+                             jsbarcode-format="CODE128"
+                             jsbarcode-height="80"
+                             jsbarcode-width="2.5"
+                             jsbarcode-margin="0"
+                             jsbarcode-displayvalue="false"></svg>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script>
+        JsBarcode(".ticket-barcode").init();
+    </script>
+}

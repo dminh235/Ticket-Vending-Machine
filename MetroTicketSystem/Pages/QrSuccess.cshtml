@@ -1,0 +1,258 @@
+﻿@page
+@model MetroTicketSystem.Pages.QrSuccessModel
+@using MetroTicketSystem.Models
+
+@{
+    var vi = ViewContext.HttpContext.Request.Cookies["lang"] != "en";
+    ViewData["Title"] = vi ? "Thanh toán thành công" : "Payment successful";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="@(vi ? "vi" : "en")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        header:not(.success-header), footer, .border-top.footer {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f6f8;
+            font-family: Arial, sans-serif;
+            color: #222;
+        }
+
+        .success-page {
+            min-height: 100vh;
+            background: #f5f6f8;
+        }
+
+        .success-header {
+            height: 95px;
+            background: #3987ed;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px #bbb;
+        }
+
+        .success-header h1 {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .success-content {
+            max-width: 900px;
+            margin: auto;
+            padding: 35px 20px;
+        }
+
+        .success-box {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 2px 8px #ddd;
+        }
+
+        .status-title {
+            color: #2e7d32;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .status-subtitle {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 25px 0;
+        }
+
+        .info-list {
+            font-size: 22px;
+            margin-bottom: 25px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-success-text {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .autoback-text {
+            color: #666;
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-sizing: border-box;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .home-button {
+            background: #3987ed;
+            color: white;
+        }
+
+        .home-button:hover {
+            background: #2469c4;
+        }
+
+        @@media (max-width: 650px) {
+            .success-header {
+                height: 80px;
+            }
+
+            .success-header h1 {
+                font-size: 26px;
+            }
+
+            .success-content {
+                padding: 20px 15px;
+            }
+
+            .status-title {
+                font-size: 24px;
+            }
+
+            .status-subtitle {
+                font-size: 18px;
+            }
+
+            .info-list {
+                font-size: 18px;
+            }
+
+            .autoback-text {
+                font-size: 16px;
+            }
+
+            .action-button {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="success-page">
+
+    <header class="success-header">
+        <h1>
+            @(vi ? "Thanh toán thành công" : "Payment successful")
+        </h1>
+    </header>
+
+    <main class="success-content">
+        <div class="success-box">
+            <div class="status-title">
+                @(vi ? "Thanh toán thành công!" : "Payment successful!")
+            </div>
+
+            <div class="status-subtitle">
+                @(vi ? "Giao dịch mô phỏng đã hoàn tất." : "The simulated transaction is complete.")
+            </div>
+
+            <hr class="divider" />
+
+            <div class="info-list">
+                <div class="info-row">
+                    <span>@(vi ? "Mã đơn hàng:" : "Order ID:")</span>
+                    <strong>@Model.Order.OrderId</strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Điểm đến:" : "Destination:")</span>
+                    <strong>@StationNames.Localize(Model.Order.DestinationName, vi)</strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Hình thức vé:" : "Trip type:")</span>
+                    <strong>
+                        @(Model.Order.TripType == "roundtrip"
+                            ? (vi ? "Khứ hồi" : "Round trip")
+                            : (vi ? "Một chiều" : "One-way"))
+                    </strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Số lượng:" : "Quantity:")</span>
+                    <strong>@Model.Order.Quantity</strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Tổng tiền:" : "Total:")</span>
+                    <strong style="color: #2469c4;">@Model.Order.TotalAmount.ToString("N0") VNĐ</strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Phương thức:" : "Payment method:")</span>
+                    <strong>@(vi ? "QR Code (Mô phỏng)" : "QR Code (Simulation)")</strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Trạng thái:" : "Status:")</span>
+                    <strong class="status-success-text">@(vi ? "Thành công" : "Successful")</strong>
+                </div>
+            </div>
+
+            <hr class="divider" />
+
+            @await Html.PartialAsync("_Tickets", Model.Tickets)
+
+            <div class="autoback-text">
+                @(vi ? "Tự động về trang chủ sau" : "Returning to the home page in")
+                <span id="autoBack">60</span>
+                @(vi ? "giây." : "seconds.")
+            </div>
+
+            <a asp-page="/Index" class="action-button home-button">
+                @(vi ? "Về trang chủ" : "Back to home")
+            </a>
+        </div>
+    </main>
+</div>
+
+<script>
+    let secondsLeft = 60;
+    const autoBackTimer = setInterval(function () {
+        secondsLeft--;
+        document.getElementById("autoBack").textContent = secondsLeft;
+        if (secondsLeft <= 0) {
+            clearInterval(autoBackTimer);
+            window.location.href = "/";
+        }
+    }, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+﻿@page
+@model MetroTicketSystem.Pages.QrSimulationModel
+@using MetroTicketSystem.Models
+
+@{
+    var vi = Model.Language != "en";
+    ViewData["Title"] = vi ? "Thanh toán QR" : "QR Payment";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="@(vi ? "vi" : "en")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        header:not(.qr-header), footer, .border-top.footer {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f6f8;
+            font-family: Arial, sans-serif;
+            color: #222;
+        }
+
+        .qr-page {
+            min-height: 100vh;
+            background: #f5f6f8;
+        }
+
+        .qr-header {
+            height: 95px;
+            background: #3987ed;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px #bbb;
+        }
+
+        .qr-header h1 {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .qr-content {
+            max-width: 650px;
+            margin: auto;
+            padding: 35px 20px;
+        }
+
+        .qr-box {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 2px 8px #ddd;
+        }
+
+        .qr-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .qr-subtitle {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .qr-image {
+            width: 280px;
+            height: 280px;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .countdown-text {
+            color: #d32f2f;
+            font-weight: bold;
+            font-size: 26px;
+            margin-top: 20px;
+            margin-bottom: 25px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 25px 0;
+        }
+
+        .info-list {
+            text-align: left;
+            font-size: 22px;
+            margin-bottom: 25px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .alert-box {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-sizing: border-box;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .pay-confirm-button {
+            background: #4d922f;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .pay-confirm-button:hover {
+            background: #3e7825;
+        }
+
+        .back-button {
+            background: #e4e7eb;
+            color: #333;
+        }
+
+        .back-button:hover {
+            background: #d5d9df;
+        }
+
+        @@media (max-width: 650px) {
+            .qr-header {
+                height: 80px;
+            }
+
+            .qr-header h1 {
+                font-size: 26px;
+            }
+
+            .qr-content {
+                padding: 20px 15px;
+            }
+
+            .qr-title {
+                font-size: 22px;
+            }
+
+            .qr-subtitle {
+                font-size: 18px;
+            }
+
+            .qr-image {
+                width: 220px;
+                height: 220px;
+            }
+
+            .countdown-text {
+                font-size: 22px;
+            }
+
+            .info-list {
+                font-size: 18px;
+            }
+
+            .alert-box {
+                font-size: 16px;
+            }
+
+            .action-button {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="qr-page">
+
+    <header class="qr-header">
+        <h1>
+            @(vi ? "Thanh toán QR" : "QR Payment")
+        </h1>
+    </header>
+
+    <main class="qr-content">
+        <div class="qr-box">
+            <div class="qr-title">
+                @(vi ? "Thanh toán bằng QR Code" : "Pay with QR Code")
+            </div>
+
+            <div class="qr-subtitle">
+                @(vi ? "Chế độ mô phỏng thanh toán" : "Payment simulation mode")
+            </div>
+
+            <img src="~/images/demo-qr.png"
+                 alt="Demo QR Code"
+                 class="qr-image" />
+
+            <div class="countdown-text">
+                @(vi ? "QR hết hạn sau:" : "QR code expires in:")
+                <span id="countdown">05:00</span>
+            </div>
+
+            <hr class="divider" />
+
+            <div class="info-list">
+                <div class="info-row">
+                    <span>@(vi ? "Mã đơn hàng:" : "Order ID:")</span>
+                    <strong>@Model.OrderId</strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Điểm đến:" : "Destination:")</span>
+                    <strong>@StationNames.FromKey(Model.Destination, vi)</strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Số lượng vé:" : "Ticket quantity:")</span>
+                    <strong>@Model.Quantity</strong>
+                </div>
+                <div class="info-row">
+                    <span>@(vi ? "Tổng tiền:" : "Total:")</span>
+                    <strong style="color: #2469c4;">@Model.Amount.ToString("N0") VNĐ</strong>
+                </div>
+            </div>
+
+            <div class="alert-box">
+                @(vi ? "Đây là QR Code mô phỏng, không dùng để thanh toán thật."
+                     : "This is a simulated QR code, not for real payments.")
+            </div>
+
+            <form method="post" asp-page-handler="Confirm">
+                <input type="hidden" name="orderId" value="@Model.OrderId" />
+
+                <button type="submit" class="action-button pay-confirm-button">
+                    @(vi ? "Đã thanh toán" : "I have paid")
+                </button>
+            </form>
+
+            <a id="backLink"
+               asp-page="/Page2"
+               asp-route-destination="@Model.Destination"
+               asp-route-tripType="@Model.TripType"
+               asp-route-language="@Model.Language"
+               class="action-button back-button">
+                @(vi ? "Quay lại" : "Back")
+            </a>
+        </div>
+    </main>
+</div>
+
+<script>
+    let remaining = 300;
+    const countdownTimer = setInterval(function () {
+        remaining--;
+        const m = String(Math.floor(remaining / 60)).padStart(2, "0");
+        const s = String(remaining % 60).padStart(2, "0");
+        document.getElementById("countdown").textContent = m + ":" + s;
+        if (remaining <= 0) {
+            clearInterval(countdownTimer);
+            document.getElementById("backLink").click();
+        }
+    }, 1000);
+</script>
+</body>
+</html>
